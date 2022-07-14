@@ -49,43 +49,6 @@ def crawl_epik(url, run_headless=True):
     return posts
 
 
-def crawl_gab(url, run_headless=True):
-    if run_headless:
-        display = Display(visible = False, size = (1024, 768))
-        display.start()
-
-    url = correct_url(url)
-    browser = webdriver.Chrome("C:/Users/brend/Downloads/chromedriver_win32/chromedriver.exe")
-    browser.get(url)
-    elements = browser.find_elements_by_xpath("//h2[@class = 'entry-title heading-size-1']/a")
-    links = []
-    for e in elements:
-        link = e.get_attribute("href")
-        links.append(link)
-    x = 7
-    while x != 0:
-        older_link = browser.find_element_by_xpath("//a[@class = 'next page-numbers']").get_attribute("href")
-        browser.get(older_link)
-        elements = browser.find_elements_by_xpath("//h2[@class = 'entry-title heading-size-1']/a")
-        for e in elements:
-            link = e.get_attribute("href")
-            links.append(link)
-        x -= 1
-    posts = []
-    for l in links:
-        browser.get(l)
-        t = browser.find_element_by_xpath("//h1[@class = 'entry-title']").get_attribute("innerHTML")
-        d = browser.find_element_by_xpath("//li[@class = 'post-date meta-wrapper']").get_attribute("innerHTML")
-        b = browser.find_element_by_xpath("//div[@class = 'entry-content']").get_attribute("innerHTML")
-        title = bs.BeautifulSoup(t, "html.parser").get_text(strip = True)
-        date = bs.BeautifulSoup(d, "html.parser").get_text(strip = True)
-        body = bs.BeautifulSoup(b, "html.parser").get_text(strip = True)
-        posts.append([title, date, body])
-
-    browser.quit()
-
-    return posts
-
 def save(file_location, posts):
     with open(file_location, "w", encoding = "utf-8") as file:
         for post in posts:
@@ -101,11 +64,6 @@ def main():
     epik_posts = crawl_epik(epik_url, run_headless = False)
     print(epik_posts)
     save("C:/Users/brend/Documents/projects/conservative_internet/epik.txt", epik_posts)
-
-    gab_url = "https://news.gab.com/category/gab/"
-    gab_posts = crawl_gab(gab_url, run_headless = False)
-    print(gab_posts)
-    save("C:/Users/brend/Documents/projects/conservative_internet/gab.txt", gab_posts)
 
 
 main()
